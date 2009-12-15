@@ -2,6 +2,7 @@ import os, logging
 from ConfigParser import NoSectionError, NoOptionError
 
 from gitosis import group
+from gitosis.my_fnmatch import fnmatch
 
 def haveAccess(config, user, mode, path):
     """
@@ -43,16 +44,19 @@ def haveAccess(config, user, mode, path):
 
         mapping = None
 
-        if path in repos:
-            log.debug(
-                'Access ok for %(user)r as %(mode)r on %(path)r'
-                % dict(
-                user=user,
-                mode=mode,
-                path=path,
-                ))
-            mapping = path
-        else:
+        # fnmatch provide glob match support. Jiang Xin <jiangxin net AT ossxp.com>
+        for r in repos:
+            if fnmatch(path, r):
+                log.debug(
+                    'Access ok for %(user)r as %(mode)r on %(path)r'
+                    % dict(
+                    user=user,
+                    mode=mode,
+                    path=path,
+                    ))
+                mapping = path
+                break
+        if mapping is None:
             try:
                 mapping = config.get('group %s' % groupname,
                                      'map %s %s' % (mode, path))
@@ -86,3 +90,5 @@ def haveAccess(config, user, mode, path):
                 path=mapping,
                 ))
             return (prefix, mapping)
+
+# vim: et sw=4 ts=4
