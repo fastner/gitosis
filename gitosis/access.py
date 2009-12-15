@@ -58,8 +58,12 @@ def haveAccess(config, user, mode, path):
                 break
         if mapping is None:
             try:
-                mapping = config.get('group %s' % groupname,
-                                     'map %s %s' % (mode, path))
+                for option in config.options('group %s' % groupname):
+                    if not option.startswith('map'):
+                        continue
+                    if fnmatch('map %s %s' % (mode, path), option):
+                        mapping = config.get('group %s' % groupname, option)
+                        break
             except (NoSectionError, NoOptionError):
                 pass
             else:
