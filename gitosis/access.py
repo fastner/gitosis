@@ -63,6 +63,8 @@ def haveAccess(config, user, mode, path):
                         continue
                     if fnmatch('map %s %s' % (mode, path), option):
                         mapping = config.get('group %s' % groupname, option)
+                        if '\\1' in mapping:
+                            mapping = mapping.replace('\\1', path)
                         break
             except (NoSectionError, NoOptionError):
                 pass
