@@ -114,7 +114,10 @@ In your clone of ``gitosis-admin``, edit ``gitosis.conf`` and add::
 
 	[group myteam]
 	members = jdoe
-	writable = myproject
+  init = users/jdoe/**
+  read = pub/**
+	write = myproject
+  map write project_* = pub/\1
 
 Commit that change and push. Then create the initial commit and push
 it::

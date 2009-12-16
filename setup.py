@@ -18,7 +18,7 @@ def subdir_contents(path):
 
 setup(
     name = "gitosis",
-    version = "0.2-ossxp.1",
+    version = "0.2-ossxp.2",
     packages = find_packages(),
 
     author = "Tommi Virtanen",
