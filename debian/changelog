@@ -1,4 +1,4 @@
-gitosis (1:0.2-ossxp.2) unstable; urgency=low
+gitosis (1:0.2-ossxp.3) unstable; urgency=low
 
   * Change version number to override debian gitosis package.
 
