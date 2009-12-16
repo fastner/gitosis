@@ -1,3 +1,9 @@
+gitosis (1:0.2-ossxp.2) unstable; urgency=low
+
+  * Change version number to override debian gitosis package.
+
+ -- Jiang Xin <jiangxin@ossxp.com>  Wed, 16 Dec 2009 13:39:09 +0800
+
 gitosis (0.2-ossxp.2) unstable; urgency=low
 
   * Add new auth rule: init. Users only with init permission can
