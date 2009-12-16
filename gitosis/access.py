@@ -17,8 +17,8 @@ def haveAccess(config, user, mode, path):
     log = logging.getLogger('gitosis.access.haveAccess')
 
     synonyms = {}
-    synonyms['read'] = ['read', 'readonly', 'readable', 'r']
-    synonyms['write'] = ['write', 'writable', 'writeable', 'readwrite', 'rw']
+    synonyms['read'] = ['readonly', 'read', 'readable']
+    synonyms['write'] = ['writable', 'write', 'writeable']
     synonyms['init'] = ['init']
 
     mode_syns = []
@@ -62,12 +62,13 @@ def haveAccess(config, user, mode, path):
             options = config.options('group %s' % groupname)
             for syn in mode_syns:
                 if syn in options:
-                    log.warning(
-                        'Repository %r config has typo "'
-                        + syn + '", '
-                        +'should be "' + mode +'"',
-                        path,
-                        )
+                    if syn != mode and syn != mode_syns[0]:
+                        log.warning(
+                            'Repository %r config has typo "'
+                            + syn + '", '
+                            +'should be "' + mode +'"',
+                            path,
+                            )
                     repos = config.get('group %s' % groupname, syn)
                     break
         except (NoSectionError, NoOptionError):
