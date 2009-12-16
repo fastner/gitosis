@@ -1,3 +1,11 @@
+gitosis (0.2-ossxp.1) unstable; urgency=low
+
+  * With OSSXP Enhancement
+    - Repos match using wildcard characters, such as *, **
+    - Mapping can using wildcard and macro such as \1
+
+ -- Jiang Xin <jiangxin@ossxp.com>  Wed, 16 Dec 2009 09:29:46 +0800
+
 gitosis (0.2) unstable; urgency=low
 
   * Fix initial push syntax in README. Needs to say "refs/heads/".
