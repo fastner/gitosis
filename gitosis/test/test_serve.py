@@ -215,7 +215,31 @@ def test_simple_read_space():
         )
     eq(got, "git upload-pack '%s/foo.git'" % tmp)
 
-def test_read_inits_if_needed():
+def test_read_inits_if_needed_with_init_permission():
+    # a clone of a non-existent repository (but where config
+    # authorizes you to do that) will create the repository on the fly
+    tmp = util.maketemp()
+    cfg = RawConfigParser()
+    cfg.add_section('gitosis')
+    repositories = os.path.join(tmp, 'repositories')
+    os.mkdir(repositories)
+    cfg.set('gitosis', 'repositories', repositories)
+    generated = os.path.join(tmp, 'generated')
+    os.mkdir(generated)
+    cfg.set('gitosis', 'generate-files-in', generated)
+    cfg.add_section('group foo')
+    cfg.set('group foo', 'members', 'jdoe')
+    cfg.set('group foo', 'init', 'foo')
+    got = serve.serve(
+        cfg=cfg,
+        user='jdoe',
+        command="git-upload-pack 'foo'",
+        )
+    eq(got, "git-upload-pack '%s/foo.git'" % repositories)
+    eq(os.listdir(repositories), ['foo.git'])
+    assert os.path.isfile(os.path.join(repositories, 'foo.git', 'HEAD'))
+
+def test_read_inits_if_needed_without_init_permission():
     # a clone of a non-existent repository (but where config
     # authorizes you to do that) will create the repository on the fly
     tmp = util.maketemp()
@@ -230,14 +254,15 @@ def test_read_inits_if_needed():
     cfg.add_section('group foo')
     cfg.set('group foo', 'members', 'jdoe')
     cfg.set('group foo', 'readonly', 'foo')
-    got = serve.serve(
+    e = assert_raises(
+        serve.InitAccessDenied,
+        serve.serve,
         cfg=cfg,
         user='jdoe',
         command="git-upload-pack 'foo'",
         )
-    eq(got, "git-upload-pack '%s/foo.git'" % repositories)
-    eq(os.listdir(repositories), ['foo.git'])
-    assert os.path.isfile(os.path.join(repositories, 'foo.git', 'HEAD'))
+    eq(str(e), 'Repository write access denied')
+    assert isinstance(e, serve.InitAccessDenied)
 
 def test_simple_write_dash():
     tmp = util.maketemp()
@@ -524,32 +549,3 @@ def test_absolute():
         command="git-upload-pack '/foo'",
         )
     eq(got, "git-upload-pack '%s/foo.git'" % tmp)
-
-def test_typo_writeable():
-    tmp = util.maketemp()
-    repository.init(os.path.join(tmp, 'foo.git'))
-    cfg = RawConfigParser()
-    cfg.add_section('gitosis')
-    cfg.set('gitosis', 'repositories', tmp)
-    cfg.add_section('group foo')
-    cfg.set('group foo', 'members', 'jdoe')
-    cfg.set('group foo', 'writeable', 'foo')
-    log = logging.getLogger('gitosis.serve')
-    buf = StringIO()
-    handler = logging.StreamHandler(buf)
-    log.addHandler(handler)
-    try:
-        got = serve.serve(
-            cfg=cfg,
-            user='jdoe',
-            command="git-receive-pack 'foo'",
-            )
-    finally:
-        log.removeHandler(handler)
-    eq(got, "git-receive-pack '%s/foo.git'" % tmp)
-    handler.flush()
-    eq(
-        buf.getvalue(),
-        "Repository 'foo' config has typo \"writeable\", shou"
-        +"ld be \"writable\"\n",
-        )
