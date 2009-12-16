@@ -47,6 +47,9 @@ class UnsafeArgumentsError(ServingError):
 class AccessDenied(ServingError):
     """Access denied to repository"""
 
+class InitAccessDenied(AccessDenied):
+    """Repository write access denied"""
+
 class WriteAccessDenied(AccessDenied):
     """Repository write access denied"""
 
@@ -87,27 +90,20 @@ def serve(
 
     path = match.group('path')
 
-    # write access is always sufficient
+    # init access is always sufficient
     newpath = access.haveAccess(
         config=cfg,
         user=user,
-        mode='writable',
+        mode='init',
         path=path)
 
+    # write access is always sufficient
     if newpath is None:
-        # didn't have write access; try once more with the popular
-        # misspelling
         newpath = access.haveAccess(
             config=cfg,
             user=user,
-            mode='writeable',
+            mode='write',
             path=path)
-        if newpath is not None:
-            log.warning(
-                'Repository %r config has typo "writeable", '
-                +'should be "writable"',
-                path,
-                )
 
     if newpath is None:
         # didn't have write access
@@ -115,7 +111,7 @@ def serve(
         newpath = access.haveAccess(
             config=cfg,
             user=user,
-            mode='readonly',
+            mode='read',
             path=path)
 
         if newpath is None:
@@ -125,7 +121,7 @@ def serve(
             # didn't have write access and tried to write
             raise WriteAccessDenied()
 
-    (topdir, relpath) = newpath
+    (topdir, relpath, mode) = newpath
     assert not relpath.endswith('.git'), \
            'git extension should have been stripped: %r' % relpath
     repopath = '%s.git' % relpath
@@ -134,6 +130,11 @@ def serve(
         # it doesn't exist on the filesystem, but the configuration
         # refers to it, we're serving a write request, and the user is
         # authorized to do that: create the repository on the fly
+
+        # If user not has init permission, raise a Error
+        # TODO: after unittest, remove mode!=write
+        if mode != 'init' and mode != 'write':
+            raise InitAccessDenied()
 
         # create leading directories
         p = topdir
