@@ -126,14 +126,13 @@ def serve(
            'git extension should have been stripped: %r' % relpath
     repopath = '%s.git' % relpath
     fullpath = os.path.join(topdir, repopath)
-    if not os.path.exists(fullpath):
+    if not os.path.exists(fullpath) and verb in COMMANDS_WRITE:
         # it doesn't exist on the filesystem, but the configuration
         # refers to it, we're serving a write request, and the user is
         # authorized to do that: create the repository on the fly
 
         # If user not has init permission, raise a Error
-        # TODO: after unittest, remove mode!=write
-        if mode != 'init' and mode != 'write':
+        if mode != 'init':
             raise InitAccessDenied()
 
         # create leading directories
