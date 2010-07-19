@@ -1,3 +1,11 @@
+gitosis (1:0.2-ossxp.4) unstable; urgency=low
+
+  * When admin clone a non-exist repository, do not create it 
+    on-the-fly. Only initial repository when admin push data
+    to non-exist repository.
+
+ -- Jiang Xin <jiangxin@ossxp.com>  Mon, 19 Jul 2010 20:23:58 +0800
+
 gitosis (1:0.2-ossxp.3) unstable; urgency=low
 
   * Change version number to override debian gitosis package.
