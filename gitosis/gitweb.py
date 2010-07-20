@@ -163,3 +163,47 @@ def set_descriptions(config):
         finally:
             f.close()
         os.rename(tmp, path)
+
+
+def set_repo_descriptions(config, path):
+    log = logging.getLogger('gitosis.gitweb.set_descriptions')
+
+    repositories = util.getRepositoryDir(config)
+    if repositories[-1] != '/':
+        repositories += '/'
+    if path.startswith(repositories):
+        path = path[len(repositories):]
+
+    name, ext = os.path.splitext(path)
+    assert ext == '.git'
+    try:
+        description = config.get('repo %s' % name, 'description')
+    except (NoSectionError, NoOptionError):
+        description = None
+
+    if description is not None:
+        if not os.path.exists(os.path.join(repositories, name)):
+            namedotgit = '%s.git' % name
+            if os.path.exists(os.path.join(repositories, namedotgit)):
+                name = namedotgit
+            else:
+                log.warning(
+                    'Cannot find %(name)r in %(repositories)r'
+                    % dict(name=name, repositories=repositories))
+
+        log.debug(
+            'Set description for %(name)r in %(repositories)r'
+            % dict(name=name, repositories=repositories))
+
+        path = os.path.join(
+            repositories,
+            name,
+            'description',
+            )
+        tmp = '%s.%d.tmp' % (path, os.getpid())
+        f = file(tmp, 'w')
+        try:
+            print >>f, description
+        finally:
+            f.close()
+        os.rename(tmp, path)

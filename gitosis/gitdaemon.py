@@ -88,3 +88,43 @@ def set_export_ok(config):
             else:
                 log.debug('Deny %r', name)
                 deny_export(os.path.join(dirpath, repo))
+
+
+def set_repo_export_ok(config, path):
+    repositories = util.getRepositoryDir(config)
+    if repositories[-1] != '/':
+        repositories += '/'
+    if path.startswith(repositories):
+        path = path[len(repositories):]
+
+    try:
+        global_enable = config.getboolean('gitosis', 'daemon')
+    except (NoSectionError, NoOptionError):
+        global_enable = False
+    log.debug(
+        'Global default is %r',
+        {True: 'allow', False: 'deny'}.get(global_enable),
+        )
+
+    name, ext = os.path.splitext(path)
+    assert ext == '.git'
+    try:
+        enable = config.getboolean('repo %s' % name, 'daemon')
+    except (NoSectionError, NoOptionError):
+        enable = global_enable
+
+    if not os.path.exists(os.path.join(repositories, name)):
+        namedotgit = '%s.git' % name
+        if os.path.exists(os.path.join(repositories, namedotgit)):
+            name = namedotgit
+        else:
+            log.warning(
+                'Cannot find %(name)r in %(repositories)r'
+                % dict(name=name, repositories=repositories))
+
+    if enable:
+        log.debug('Allow %r', name)
+        allow_export(os.path.join(repositories, name))
+    else:
+        log.debug('Deny %r', name)
+        deny_export(os.path.join(repositories, name))
