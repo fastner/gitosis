@@ -94,11 +94,11 @@ def serve(
 
     path = match.group('path')
 
-    # init access is always sufficient
+    # admin access is always sufficient
     newpath = access.haveAccess(
         config=cfg,
         user=user,
-        mode='init',
+        mode='admin',
         path=path)
 
     # write access is always sufficient
@@ -135,8 +135,8 @@ def serve(
         # refers to it, we're serving a write request, and the user is
         # authorized to do that: create the repository on the fly
 
-        # If user not has init permission, raise a Error
-        if mode != 'init':
+        # If user not has admin permission, raise a Error
+        if mode != 'admin':
             raise InitAccessDenied()
 
         # create leading directories

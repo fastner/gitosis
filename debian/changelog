@@ -1,3 +1,9 @@
+gitosis (1:0.2-ossxp.6) unstable; urgency=low
+
+  * Change right flag 'init' to 'admin' and update the document.
+
+ -- Jiang Xin <jiangxin@ossxp.com>  Tue, 20 Jul 2010 18:47:52 +0800
+
 gitosis (1:0.2-ossxp.5) unstable; urgency=low
 
   * When initialize a repos, not update gitweb and gitdaemon for

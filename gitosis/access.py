@@ -20,7 +20,7 @@ def haveAccess(config, user, mode, path):
     synonyms = {}
     synonyms['read'] = ['readonly', 'readable']
     synonyms['write'] = ['writable', 'writeable']
-    synonyms['init'] = ['initial']
+    synonyms['admin'] = ['init','initial']
 
     mode_syns = []
     for key, mode_syns in synonyms.items():

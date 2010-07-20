@@ -109,25 +109,47 @@ To add new users:
 
 To create new repositories, just authorize writing to them and
 push. It's that simple! For example: let's assume your username is
-``jdoe`` and you want to create a repository ``myproject``.
+``jdoe`` and you want to create a repository.
 In your clone of ``gitosis-admin``, edit ``gitosis.conf`` and add::
 
 	[group myteam]
 	members = jdoe
-  init = users/jdoe/**
-  read = pub/**
-	write = myproject
-  map write project_* = pub/\1
+	admin = users/jdoe/**
+	read = pub/**
+	write = ourproject
+	map write project_* = pub/\1
+	map admin myproject* = (myproject.*):users/jdoe/\1
 
-Commit that change and push. Then create the initial commit and push
-it::
+.. note::
+
+  For this case:
+
+  * ``jdoe`` can read(clone/pull) from any repository in pub, such as
+    pub/a/b.git, ...
+  * ``jdoe`` can write(push) to repository ``ourproject``, but ``jdoe``
+    can not create it if it does not exist.
+  * ``jdoe`` has admin rights for repositories under ``users/jdoe/``.
+    That means:
+
+    - ``jdoe`` can read and write from/to any repository under ``users/jdoe/``
+    - ``jdoe`` can create any repository under ``users/jdoe/``
+
+  * if ``jdoe`` write to ``myproject``, the server will redirect the write to
+    other place, such as ``users/jdoe/myproject``
+
+    - The first map directive is a simple substitution.
+    - But the second map directive is more complecated, using regex substitution.
+      The column ':' split the pattern and the substution.
+
+To create a repository under ``users/jdoe/``, ``jdoe`` must create a
+repository locale, and push to the remote server::
 
 	mkdir myproject
 	cd mypyroject
 	git init
-	git remote add myserver git@MYSERVER:myproject.git
+	git remote add myserver git@MYSERVER:users/jdoe/a/b.git
 	# do some work, git add and commit files
-	git push myserver master:refs/heads/master
+	git push myserver master
 
 That's it. If you now add others to ``members``, they can use that
 repository too.
