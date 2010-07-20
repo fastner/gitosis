@@ -17,7 +17,7 @@ from gitosis import util
 
 log = logging.getLogger('gitosis.serve')
 
-ALLOW_RE = re.compile("^'/*(?P<path>[a-zA-Z0-9][a-zA-Z0-9@._-]*(/[a-zA-Z0-9][a-zA-Z0-9@._-]*)*)'$")
+ALLOW_RE = re.compile("^'/*(?P<path>[\w][\w@._-]*(/[\w][\w@._-]*)*)'$", re.U)
 
 COMMANDS_READONLY = [
     'git-upload-pack',
@@ -84,7 +84,11 @@ def serve(
         and verb not in COMMANDS_READONLY):
         raise UnknownCommandError()
 
-    match = ALLOW_RE.match(args)
+    try:
+        match = ALLOW_RE.match(unicode(args, 'utf-8'))
+    except UnicodeDecodeError:
+        raise UnsafeArgumentsError()
+
     if match is None:
         raise UnsafeArgumentsError()
 
