@@ -17,25 +17,29 @@ def haveAccess(config, user, mode, path):
     log = logging.getLogger('gitosis.access.haveAccess')
 
     synonyms = {}
-    synonyms['read'] = ['readonly', 'read', 'readable']
-    synonyms['write'] = ['writable', 'write', 'writeable']
-    synonyms['init'] = ['init']
+    synonyms['read'] = ['readonly', 'readable']
+    synonyms['write'] = ['writable', 'writeable']
+    synonyms['init'] = ['initial']
 
     mode_syns = []
     for key, mode_syns in synonyms.items():
-        if mode in mode_syns:
-            if mode != key:
+        if mode == key:
+            break
+        elif mode in mode_syns:
+            if mod != mode_syns[0]:
                 log.warning(
                     'Provide haveAccess with mode: "'
                     + mode + '" '
                     + 'for repository %r should be "' + key +'"',
                     path,
                     )
-                mode = key
+            mode = key
             break
     if key != mode:
-        mode_syns = [mode]
         log.warning('Unknown acl mode %s, check gitosis config file.' % mode)
+        mode_syns = [mode]
+    else:
+        mode_syns.append(mode)
 
 
     log.debug(
@@ -78,7 +82,7 @@ def haveAccess(config, user, mode, path):
 
         mapping = None
 
-        # fnmatch provide glob match support. Jiang Xin <jiangxin net AT ossxp.com>
+        # fnmatch provide glob match support. Jiang Xin <jiangxin AT ossxp.com>
         for r in repos:
             if fnmatch(path, r):
                 log.debug(
