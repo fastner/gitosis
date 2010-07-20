@@ -95,29 +95,33 @@ def haveAccess(config, user, mode, path):
                     ))
                 mapping = path
                 break
-        if mapping is None:
-            try:
-                for option in config.options('group %s' % groupname):
-                    if not option.startswith('map'):
-                        continue
-                    (_ignore, opt_right) = option.split(' ',1)
-                    (opt_mode, opt_path) = opt_right.strip().split(' ',1)
-                    opt_path = opt_path.strip()
-                    if opt_mode not in mode_syns:
-                        continue
-                    if fnmatch(path, opt_path):
-                        mapping = config.get('group %s' % groupname, option)
-                        if ':' in mapping:
-                            (opt_from, opt_to) = mapping.split(':',1)
-                            mapping = re.sub(opt_from, opt_to, path)
-                        elif '\\1' in mapping:
-                            mapping = mapping.replace('\\1', path)
-                        break
-            except (NoSectionError, NoOptionError):
-                pass
-            else:
+
+        # Check mapping even if (path,mode) found in this group.
+        try:
+            re_mapping = None
+            for option in config.options('group %s' % groupname):
+                if not option.startswith('map'):
+                    continue
+                (_ignore, opt_right) = option.split(' ',1)
+                (opt_mode, opt_path) = opt_right.strip().split(' ',1)
+                opt_path = opt_path.strip()
+                if opt_mode not in mode_syns:
+                    continue
+                if fnmatch(path, opt_path):
+                    re_mapping = config.get('group %s' % groupname, option)
+                    if ':' in re_mapping:
+                        (opt_from, opt_to) = re_mapping.split(':',1)
+                        re_mapping = re.sub(opt_from, opt_to, path)
+                    elif '\\1' in re_mapping:
+                        re_mapping = re_mapping.replace('\\1', path)
+                    break
+        except (NoSectionError, NoOptionError):
+            pass
+        else:
+            if re_mapping is not None:
+                mapping = re_mapping
                 log.debug(
-                    'Access ok for %(user)r as %(mode)r on %(path)r=%(mapping)r'
+                    'Mapping ok for %(user)r as %(mode)r on %(path)r=%(mapping)r'
                     % dict(
                     user=user,
                     mode=mode,
