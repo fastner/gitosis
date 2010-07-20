@@ -1,4 +1,5 @@
 import os, logging
+import re
 from ConfigParser import NoSectionError, NoOptionError
 
 from gitosis import group
@@ -106,7 +107,10 @@ def haveAccess(config, user, mode, path):
                         continue
                     if fnmatch(path, opt_path):
                         mapping = config.get('group %s' % groupname, option)
-                        if '\\1' in mapping:
+                        if ':' in mapping:
+                            (opt_from, opt_to) = mapping.split(':',1)
+                            mapping = re.sub(opt_from, opt_to, path)
+                        elif '\\1' in mapping:
                             mapping = mapping.replace('\\1', path)
                         break
             except (NoSectionError, NoOptionError):
