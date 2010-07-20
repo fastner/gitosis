@@ -1,3 +1,16 @@
+gitosis (1:0.2-ossxp.5) unstable; urgency=low
+
+  * When initialize a repos, not update gitweb and gitdaemon for
+    others but only this repos.
+  * Check map option even if matched user/path/operation found
+    in group.
+  * mapping's option value can be regex pattern and replacement
+    split by column ':'
+  * Restructure: acl keywords synonyms check.
+  * Allow repository path in UTF-8.
+
+ -- Jiang Xin <jiangxin@ossxp.com>  Tue, 20 Jul 2010 17:17:52 +0800
+
 gitosis (1:0.2-ossxp.4) unstable; urgency=low
 
   * When admin clone a non-exist repository, do not create it 
