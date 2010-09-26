@@ -19,6 +19,9 @@ def readKeys(keydir):
         basename, ext = os.path.splitext(filename)
         if ext != '.pub':
             continue
+        # gitolite alike: user.pub = user@host.pub, but user.pub != user@ossxp.com.pub
+        if basename.rfind('@') > basename.rfind('.'):
+            basename = basename.rsplit('@',1)[0]
 
         if not isSafeUsername(basename):
             log.warn('Unsafe SSH username in keyfile: %r', filename)
