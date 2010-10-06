@@ -34,6 +34,9 @@ class InsecureSSHKeyUsername(Exception):
 def ssh_extract_user(pubkey):
     _, user = pubkey.rsplit(None, 1)
     if ssh.isSafeUsername(user):
+        # gitolite alike: user.pub = user@host.pub, but user.pub != user@ossxp.com.pub
+        if user.rfind('@') > user.rfind('.'):
+           user = user.rsplit('@',1)[0]
         return user
     else:
         raise InsecureSSHKeyUsername(repr(user))
